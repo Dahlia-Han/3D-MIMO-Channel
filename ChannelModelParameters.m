@@ -21,6 +21,9 @@ if strcmp(scenario, 'UMa')
     par.LOS_c_ASA = @UMa_LOS_c_ASA;
     par.LOS_c_ZSA = @UMa_LOS_c_ZSA;
     par.LOS_zeta = @UMa_LOS_zeta;
+    par.LOS_mu_lgZSD = @UMa_LOS_mu_lgZSD;
+    par.LOS_sigma_lgZSD = @UMa_LOS_sigma_lgZSD;
+    par.LOS_mu_offset_ZOD = @UMa_LOS_mu_offset_ZOD;
     
     par.NLOS_mu_lgDS = @UMa_NLOS_mu_lgDS;
     par.NLOS_sigma_lgDS = @UMa_NLOS_sigma_lgDS;
@@ -41,6 +44,9 @@ if strcmp(scenario, 'UMa')
     par.NLOS_c_ASA = @UMa_NLOS_c_ASA;
     par.NLOS_c_ZSA = @UMa_NLOS_c_ZSA;
     par.NLOS_zeta = @UMa_NLOS_zeta;
+    par.NLOS_mu_lgZSD = @UMa_NLOS_mu_lgZSD;
+    par.NLOS_sigma_lgZSD = @UMa_NLOS_sigma_lgZSD;
+    par.NLOS_mu_offset_ZOD = @UMa_NLOS_mu_offset_ZOD;
     
 elseif strcmp(scenario, 'UMi')
     par.LOS_mu_lgDS = @UMi_LOS_mu_lgDS;
@@ -64,6 +70,9 @@ elseif strcmp(scenario, 'UMi')
     par.LOS_c_ASA = @UMi_LOS_c_ASA;
     par.LOS_c_ZSA = @UMi_LOS_c_ZSA;
     par.LOS_zeta = @UMi_LOS_zeta;
+    par.LOS_mu_lgZSD = @UMi_LOS_mu_lgZSD;
+    par.LOS_sigma_lgZSD = @UMi_LOS_sigma_lgZSD;
+    par.LOS_mu_offset_ZOD = @UMi_LOS_mu_offset_ZOD;
     
     par.NLOS_mu_lgDS = @UMi_NLOS_mu_lgDS;
     par.NLOS_sigma_lgDS = @UMi_NLOS_sigma_lgDS;
@@ -84,6 +93,9 @@ elseif strcmp(scenario, 'UMi')
     par.NLOS_c_ASA = @UMi_NLOS_c_ASA;
     par.NLOS_c_ZSA = @UMi_NLOS_c_ZSA;
     par.NLOS_zeta = @UMi_NLOS_zeta;
+    par.NLOS_mu_lgZSD = @UMi_NLOS_mu_lgZSD;
+    par.NLOS_sigma_lgZSD = @UMi_NLOS_sigma_lgZSD;
+    par.NLOS_mu_offset_ZOD = @UMi_NLOS_mu_offset_ZOD;
     
 elseif strcmp(scenario, 'RMa')
     par.LOS_mu_lgDS = @RMa_LOS_mu_lgDS;
@@ -106,6 +118,9 @@ elseif strcmp(scenario, 'RMa')
     par.LOS_c_ASA = @RMa_LOS_c_ASA;
     par.LOS_c_ZSA = @RMa_LOS_c_ZSA;
     par.LOS_zeta = @RMa_LOS_zeta;
+    par.LOS_mu_lgZSD = @RMa_LOS_mu_lgZSD;
+    par.LOS_sigma_lgZSD = @RMa_LOS_sigma_lgZSD;
+    par.LOS_mu_offset_ZOD = @RMa_LOS_mu_offset_ZOD;
     
     par.NLOS_mu_lgDS = @RMa_NLOS_mu_lgDS;
     par.NLOS_sigma_lgDS = @RMa_NLOS_sigma_lgDS;
@@ -125,6 +140,9 @@ elseif strcmp(scenario, 'RMa')
     par.NLOS_c_ASA = @RMa_NLOS_c_ASA;
     par.NLOS_c_ZSA = @RMa_NLOS_c_ZSA;
     par.NLOS_zeta = @RMa_NLOS_zeta;
+    par.NLOS_mu_lgZSD = @RMa_NLOS_mu_lgZSD;
+    par.NLOS_sigma_lgZSD = @RMa_NLOS_sigma_lgZSD;
+    par.NLOS_mu_offset_ZOD = @RMa_NLOS_mu_offset_ZOD;
 else
     error('错误的场景类型，目前支持"UMa","UMi","RMa"')
 end
@@ -204,6 +222,15 @@ end
 function zeta = UMa_LOS_zeta()
 zeta = 3;
 end
+function mu_lgZSD = UMa_LOS_mu_lgZSD(d_2D_m, h_UT_m)
+mu_lgZSD = max(-0.5, -2.1*(d_2D_m/1000)-0.01*(h_UT_m-1.5)+0.75);
+end
+function sigma_lgZSD = UMa_LOS_sigma_lgZSD()
+sigma_lgZSD = 0.4;
+end
+function mu_offset_ZOD = UMa_LOS_mu_offset_ZOD()
+mu_offset_ZOD = 0;
+end
 
 % NLOS
 function mu_lgDS = UMa_NLOS_mu_lgDS(fc_GHz)
@@ -277,6 +304,22 @@ c_ZSA = 7;
 end
 function zeta = UMa_NLOS_zeta()
 zeta = 3;
+end
+function mu_lgZSD = UMa_NLOS_mu_lgZSD(d_2D_m, h_UT_m)
+mu_lgZSD = max(-0.5, -2.1*(d_2D_m/1000)-0.01*(h_UT_m-1.5)+0.9);
+end
+function sigma_lgZSD = UMa_NLOS_sigma_lgZSD()
+sigma_lgZSD = 0.49;
+end
+function mu_offset_ZOD = UMa_NLOS_mu_offset_ZOD(fc_GHz, d_2D_m, h_UT_m)
+if fc_GHz<6
+    fc_GHz = 6;
+end
+a = 0.208*log10(fc_GHz)-0.782;
+b = 25;
+c = -0.13*log10(fc_GHz)+2.03;
+e = 7.66*log10(fc_GHz)-5.96;
+mu_offset_ZOD = e-10^(a*log10(max(b, d_2D_m))+c-0.07*(h_UT_m-1.5));
 end
 
 %% UMi
@@ -362,6 +405,15 @@ end
 function zeta = UMi_LOS_zeta()
 zeta = 3;
 end
+function mu_lgZSD = UMi_LOS_mu_lgZSD(d_2D_m, h_BS_m, h_UT_m)
+mu_lgZSD = max(-0.21, -14.8*(d_2D_m/1000)+0.01*abs(h_BS_m - h_UT_m)+0.83);
+end
+function sigma_lgZSD = UMi_LOS_sigma_lgZSD()
+sigma_lgZSD = 0.35;
+end
+function mu_offset_ZOD = UMi_LOS_mu_offset_ZOD()
+mu_offset_ZOD = 0;
+end
 
 % NLOS
 function mu_lgDS = UMi_NLOS_mu_lgDS(fc_GHz)
@@ -445,6 +497,15 @@ end
 function zeta = UMi_NLOS_zeta()
 zeta = 3;
 end
+function mu_lgZSD = UMi_NLOS_mu_lgZSD(d_2D_m, h_BS_m, h_UT_m)
+mu_lgZSD = max(-0.5, -3.1*(d_2D_m/1000)+0.01*max(h_UT_m-h_BS_m, 0)+0.2);
+end
+function sigma_lgZSD = UMi_NLOS_sigma_lgZSD()
+sigma_lgZSD = 0.35;
+end
+function mu_offset_ZOD = UMi_NLOS_mu_offset_ZOD(d_2D_m)
+mu_offset_ZOD = -10^(-1.5*log10(max(10, d_2D_m))+3.3);
+end
 
 %% RMa
 % LOS
@@ -508,6 +569,15 @@ end
 function zeta = RMa_LOS_zeta()
 zeta = 3;
 end
+function mu_lgZSD = RMa_LOS_mu_lgZSD(d_2D_m, h_UT_m)
+mu_lgZSD = max(-1, -0.17*(d_2D_m/1000)-0.01*(h_UT_m-1.5)+0.22);
+end
+function sigma_lgZSD = RMa_LOS_sigma_lgZSD()
+sigma_lgZSD = 0.34;
+end
+function mu_offset_ZOD = RMa_LOS_mu_offset_ZOD()
+mu_offset_ZOD = 0;
+end
 
 % NLOS
 function mu_lgDS = RMa_NLOS_mu_lgDS()
@@ -563,4 +633,70 @@ c_ZSA = 3;
 end
 function zeta = RMa_NLOS_zeta()
 zeta = 3;
+end
+function mu_lgZSD = RMa_NLOS_mu_lgZSD(d_2D_m, h_UT_m)
+mu_lgZSD = max(-1, -0.19*(d_2D_m/1000)-0.01*(h_UT_m-1.5)+0.28);
+end
+function sigma_lgZSD = RMa_NLOS_sigma_lgZSD()
+sigma_lgZSD = 0.3;
+end
+function mu_offset_ZOD = RMa_NLOS_mu_offset_ZOD(d_2D_m)
+mu_offset_ZOD = atan((35-3.5)/d_2D_m)-atan((35-1.5)/d_2D_m);
+end
+
+
+%%
+function C_PHI_NLOS = ScalingFactors_C_PHI_NLOS(clusters)
+if clusters == 4
+    C_PHI_NLOS = 0.779;
+elseif clusters == 5
+    C_PHI_NLOS = 0.86;
+elseif clusters == 8
+    C_PHI_NLOS = 1.018;
+elseif clusters == 10
+    C_PHI_NLOS = 1.09;
+elseif clusters == 11
+    C_PHI_NLOS = 1.123;
+elseif clusters == 12
+    C_PHI_NLOS = 1.146;
+elseif clusters == 14
+    C_PHI_NLOS = 1.19;
+elseif clusters == 15
+    C_PHI_NLOS = 1.211;
+elseif clusters == 16
+    C_PHI_NLOS = 1.226;
+elseif clusters == 19
+    C_PHI_NLOS = 1.273;
+elseif clusters == 20
+    C_PHI_NLOS = 1.289;
+elseif clusters == 25
+    C_PHI_NLOS = 1.358;
+else
+    error('错误的簇数，支持4,5,8,10,11,12,14,15,16,19,20,25')
+end
+end
+function C_THETA_NLOS = ScalingFactors_C_THETA_NLOS(clusters)
+if clusters == 8
+    C_THETA_NLOS = 0.889;
+elseif clusters == 10
+    C_THETA_NLOS = 0.957;
+elseif clusters == 11
+    C_THETA_NLOS = 1.031;
+elseif clusters == 12
+    C_THETA_NLOS = 1.104;
+elseif clusters == 15
+    C_THETA_NLOS = 1.1088;
+elseif clusters == 19
+    C_THETA_NLOS = 1.184;
+elseif clusters == 20
+    C_THETA_NLOS = 1.178;
+elseif clusters == 25
+    C_THETA_NLOS = 1.282;
+else
+    error('错误的簇数，支持8,10,11,12,15,19,20,25')
+end
+end
+function alpha_m = RayOffsetAngles()
+alpha_m = [0.0447, -0.0447, 0.1413, -0.1413, 0.2492, -0.2492, 0.3715, -0.3715, 0.5129, -0.5129, ...
+    0.6797, -0.6797, 0.8844, -0.8844, 1.1481, -1.1481, 1.5195, -1.5195, 2.1551, -2.1551];
 end
