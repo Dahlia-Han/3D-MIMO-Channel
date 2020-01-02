@@ -24,6 +24,7 @@ if strcmp(scenario, 'UMa')
     par.LOS_mu_lgZSD = @UMa_LOS_mu_lgZSD;
     par.LOS_sigma_lgZSD = @UMa_LOS_sigma_lgZSD;
     par.LOS_mu_offset_ZOD = @UMa_LOS_mu_offset_ZOD;
+    par.LOS_PL = @UMa_LOS_PL;
     
     par.NLOS_mu_lgDS = @UMa_NLOS_mu_lgDS;
     par.NLOS_sigma_lgDS = @UMa_NLOS_sigma_lgDS;
@@ -47,6 +48,7 @@ if strcmp(scenario, 'UMa')
     par.NLOS_mu_lgZSD = @UMa_NLOS_mu_lgZSD;
     par.NLOS_sigma_lgZSD = @UMa_NLOS_sigma_lgZSD;
     par.NLOS_mu_offset_ZOD = @UMa_NLOS_mu_offset_ZOD;
+    par.NLOS_PL = @UMa_NLOS_PL;
     
 elseif strcmp(scenario, 'UMi')
     par.LOS_mu_lgDS = @UMi_LOS_mu_lgDS;
@@ -73,6 +75,7 @@ elseif strcmp(scenario, 'UMi')
     par.LOS_mu_lgZSD = @UMi_LOS_mu_lgZSD;
     par.LOS_sigma_lgZSD = @UMi_LOS_sigma_lgZSD;
     par.LOS_mu_offset_ZOD = @UMi_LOS_mu_offset_ZOD;
+    par.LOS_PL = @UMi_LOS_PL;
     
     par.NLOS_mu_lgDS = @UMi_NLOS_mu_lgDS;
     par.NLOS_sigma_lgDS = @UMi_NLOS_sigma_lgDS;
@@ -96,6 +99,7 @@ elseif strcmp(scenario, 'UMi')
     par.NLOS_mu_lgZSD = @UMi_NLOS_mu_lgZSD;
     par.NLOS_sigma_lgZSD = @UMi_NLOS_sigma_lgZSD;
     par.NLOS_mu_offset_ZOD = @UMi_NLOS_mu_offset_ZOD;
+    par.NLOS_PL = @UMi_NLOS_PL;
     
 elseif strcmp(scenario, 'RMa')
     par.LOS_mu_lgDS = @RMa_LOS_mu_lgDS;
@@ -121,6 +125,7 @@ elseif strcmp(scenario, 'RMa')
     par.LOS_mu_lgZSD = @RMa_LOS_mu_lgZSD;
     par.LOS_sigma_lgZSD = @RMa_LOS_sigma_lgZSD;
     par.LOS_mu_offset_ZOD = @RMa_LOS_mu_offset_ZOD;
+    par.LOS_PL = @RMa_LOS_PL;
     
     par.NLOS_mu_lgDS = @RMa_NLOS_mu_lgDS;
     par.NLOS_sigma_lgDS = @RMa_NLOS_sigma_lgDS;
@@ -143,6 +148,7 @@ elseif strcmp(scenario, 'RMa')
     par.NLOS_mu_lgZSD = @RMa_NLOS_mu_lgZSD;
     par.NLOS_sigma_lgZSD = @RMa_NLOS_sigma_lgZSD;
     par.NLOS_mu_offset_ZOD = @RMa_NLOS_mu_offset_ZOD;
+    par.NLOS_PL = @RMa_NLOS_PL;
 else
     error('错误的场景类型，目前支持"UMa","UMi","RMa"')
 end
@@ -231,6 +237,26 @@ end
 function mu_offset_ZOD = UMa_LOS_mu_offset_ZOD()
 mu_offset_ZOD = 0;
 end
+function PL_LOS = UMa_LOS_PL(d_2D_m, d_3D_m, fc_GHz, h_BS_m, h_UT_m)
+d_BP = d_prime_BP(h_BS_m, h_UT_m, fc_GHz);
+if d_2D_m <= d_BP
+    PL_LOS = UMa_LOS_PL1(d_3D_m, fc_GHz);
+else
+     PL_LOS = UMa_LOS_PL2(d_3D_m, fc_GHz, h_BS_m, h_UT_m);
+end
+end
+function PL1 = UMa_LOS_PL1(d_3D_m, fc_GHz)
+PL1 = 28+22*log10(d_3D_m)+20*log10(fc_GHz);
+end
+function PL2 = UMa_LOS_PL2(d_3D_m, fc_GHz, h_BS_m, h_UT_m)
+PL2 = 28+40*log10(d_3D_m)+20*log10(fc_GHz)-9*log10(d_prime_BP(h_BS_m, h_UT_m, fc_GHz)^2+(h_BS_m-h_UT_m)^2);
+end
+function  d_BP = d_prime_BP(h_BS_m, h_UT_m, fc_GHz)
+hE = 1;
+h_prime_BS = h_BS_m-hE;
+h_prime_UT = h_UT_m-hE;
+d_BP = 4*h_prime_BS*h_prime_UT*fc_GHz*1e9/3/1e8;
+end
 
 % NLOS
 function mu_lgDS = UMa_NLOS_mu_lgDS(fc_GHz)
@@ -270,7 +296,7 @@ function sigma_lgZSA = UMa_NLOS_sigma_lgZSA()
 sigma_lgZSA = 0.16;
 end
 function sigma_SF = UMa_NLOS_sigma_SF()
-sigma_SF = 6;
+sigma_SF = 7.8;
 end
 function r_tau = UMa_NLOS_DelayScaling_r_tau()
 r_tau = 2.3;
@@ -320,6 +346,9 @@ b = 25;
 c = -0.13*log10(fc_GHz)+2.03;
 e = 7.66*log10(fc_GHz)-5.96;
 mu_offset_ZOD = e-10^(a*log10(max(b, d_2D_m))+c-0.07*(h_UT_m-1.5));
+end
+function PL_NLOS = UMa_NLOS_PL(d_3D_m, fc_GHz)
+PL_NLOS = 32.4+20*log10(fc_GHz)+30*log10(d_3D_m);
 end
 
 %% UMi
@@ -414,6 +443,20 @@ end
 function mu_offset_ZOD = UMi_LOS_mu_offset_ZOD()
 mu_offset_ZOD = 0;
 end
+function PL_LOS = UMi_LOS_PL(d_2D_m, d_3D_m, fc_GHz, h_BS_m, h_UT_m)
+d_BP = d_prime_BP(h_BS_m, h_UT_m, fc_GHz);
+if d_2D_m <= d_BP
+    PL_LOS = UMi_LOS_PL1(d_3D_m, fc_GHz);
+else
+     PL_LOS = UMi_LOS_PL2(d_3D_m, fc_GHz, h_BS_m, h_UT_m);
+end
+end
+function PL1 = UMi_LOS_PL1(d_3D_m, fc_GHz)
+PL1 = 32.4+21*log10(d_3D_m)+20*log10(fc_GHz);
+end
+function PL2 = UMi_LOS_PL2(d_3D_m, fc_GHz, h_BS_m, h_UT_m)
+PL2 = 32.4+40*log10(d_3D_m)+20*log10(fc_GHz)-9.5*log10(d_prime_BP(h_BS_m, h_UT_m, fc_GHz)^2+(h_BS_m-h_UT_m)^2);
+end
 
 % NLOS
 function mu_lgDS = UMi_NLOS_mu_lgDS(fc_GHz)
@@ -506,6 +549,11 @@ end
 function mu_offset_ZOD = UMi_NLOS_mu_offset_ZOD(d_2D_m)
 mu_offset_ZOD = -10^(-1.5*log10(max(10, d_2D_m))+3.3);
 end
+function PL_NLOS = UMi_NLOS_PL(d_2D_m, d_3D_m, fc_GHz,  h_BS_m, h_UT_m)
+PL_LOS = UMi_LOS_PL(d_2D_m, d_3D_m, fc_GHz, h_BS_m, h_UT_m);
+PL_NLOS = 22.4+21.3*log10(fc_GHz)+35.3*log10(d_3D_m)-0.3*(h_UT_m-1.5);
+PL_NLOS = max(PL_LOS, PL_NLOS);
+end
 
 %% RMa
 % LOS
@@ -578,6 +626,20 @@ end
 function mu_offset_ZOD = RMa_LOS_mu_offset_ZOD()
 mu_offset_ZOD = 0;
 end
+function PL_LOS = RMa_LOS_PL(d_2D_m,  d_3D_m, fc_GHz, h_BS_m, h_UT_m)
+d_BP =2*pi*h_BS_m* h_UT_m* fc_GHz*1e9/3/1e8;
+if d_2D_m <= d_BP
+    PL_LOS =RMa_LOS_PL1(d_3D_m, fc_GHz);
+else
+     PL_LOS = RMa_LOS_PL2(d_3D_m, fc_GHz, d_BP);
+end
+end
+function PL1 = RMa_LOS_PL1(d_3D_m, fc_GHz)
+PL1 = 20*log10(40*pi*d_3D_m*fc_GHz/3)+min(0.03*5^1.72, 10)*log10(d_3D_m)-min(0.044*5^1.72, 14.77)+0.002*log10(5)*d_3D_m;
+end
+function PL2 = RMa_LOS_PL2(d_3D_m, fc_GHz, d_BP)
+PL2 = 40*log10(d_3D_m/d_BP)+RMa_LOS_PL1(d_3D_m, fc_GHz);
+end
 
 % NLOS
 function mu_lgDS = RMa_NLOS_mu_lgDS()
@@ -643,7 +705,13 @@ end
 function mu_offset_ZOD = RMa_NLOS_mu_offset_ZOD(d_2D_m)
 mu_offset_ZOD = atan((35-3.5)/d_2D_m)-atan((35-1.5)/d_2D_m);
 end
-
+function PL_NLOS = RMa_NLOS_PL(d_2D_m, d_3D_m, fc_GHz,  h_BS_m, h_UT_m)
+PL_LOS = RMa_LOS_PL(d_2D_m, d_3D_m, fc_GHz, h_BS_m, h_UT_m);
+PL_NLOS = 161.04-7.11*log10(20)+7.5*log10(5)-(24.37-3.7*(5/h_BS_m)^2)*log10(h_BS_m)...
+    +(43.42-3.1*log10(h_BS_m))*(log10(d_3D_m)-3)...
+    +20*log10(fc_GHz)-(3.2*(log10(11.75*h_UT_m))^2-4.97);
+PL_NLOS = max(PL_LOS, PL_NLOS);
+end
 
 %%
 function C_PHI_NLOS = ScalingFactors_C_PHI_NLOS(clusters)
