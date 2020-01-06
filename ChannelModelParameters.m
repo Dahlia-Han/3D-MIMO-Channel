@@ -1,5 +1,7 @@
 function par = ChannelModelParameters(scenario)
 if strcmp(scenario, 'UMa')
+    par.Pr_LOS = @UMa_Pr_LOS;
+    
     par.LOS_mu_lgDS = @UMa_LOS_mu_lgDS;
     par.LOS_sigma_lgDS = @UMa_LOS_sigma_lgDS;
     par.LOS_mu_lgASD = @UMa_LOS_mu_lgASD;
@@ -51,6 +53,8 @@ if strcmp(scenario, 'UMa')
     par.NLOS_PL = @UMa_NLOS_PL;
     
 elseif strcmp(scenario, 'UMi')
+    par.Pr_LOS = @UMi_Pr_LOS;
+    
     par.LOS_mu_lgDS = @UMi_LOS_mu_lgDS;
     par.LOS_sigma_lgDS = @UMi_LOS_sigma_lgDS;
     par.LOS_mu_lgASD = @UMi_LOS_mu_lgASD;
@@ -102,6 +106,8 @@ elseif strcmp(scenario, 'UMi')
     par.NLOS_PL = @UMi_NLOS_PL;
     
 elseif strcmp(scenario, 'RMa')
+    par.Pr_LOS = @RMa_Pr_LOS;
+    
     par.LOS_mu_lgDS = @RMa_LOS_mu_lgDS;
     par.LOS_sigma_lgDS = @RMa_LOS_sigma_lgDS;
     par.LOS_mu_lgASD = @RMa_LOS_mu_lgASD;
@@ -155,6 +161,20 @@ end
 end
 
 %% UMa
+function Pr_LOS = UMa_Pr_LOS(d_2D_m, h_UT_m)
+if d_2D_m <= 18
+    Pr_LOS = 1;
+else
+    if h_UT_m <= 13
+        C = 0;
+    else
+        C = ((h_UT_m-13)/10)^1.5;
+    end
+    a = 18/d_2D_m+exp(-d_2D_m/63)*(1-18/d_2D_m);
+    b = 1+C*1.25*(d_2D_m/100)^3*exp(-d_2D_m/150);
+    Pr_LOS = a*b;
+end
+end
 % LOS
 function mu_lgDS = UMa_LOS_mu_lgDS(fc_GHz)
 if fc_GHz<6
@@ -352,6 +372,15 @@ PL_NLOS = 32.4+20*log10(fc_GHz)+30*log10(d_3D_m);
 end
 
 %% UMi
+function Pr_LOS = UMi_Pr_LOS(d_2D_m)
+if d_2D_m <= 18
+    Pr_LOS = 1;
+else
+    a = 18/d_2D_m;
+    b = exp(-d_2D_m/36)*(1-18/d_2D_m);
+    Pr_LOS = a+b;
+end
+end
 % LOS
 function mu_lgDS = UMi_LOS_mu_lgDS(fc_GHz)
 if fc_GHz<2
@@ -556,6 +585,13 @@ PL_NLOS = max(PL_LOS, PL_NLOS);
 end
 
 %% RMa
+function Pr_LOS = RMa_Pr_LOS(d_2D_m)
+if d_2D_m <= 10
+    Pr_LOS = 1;
+else
+    Pr_LOS = exp(-(d_2D_m-10)/1000);
+end
+end
 % LOS
 function mu_lgDS = RMa_LOS_mu_lgDS()
 mu_lgDS = -7.49;
